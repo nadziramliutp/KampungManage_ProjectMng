@@ -1,0 +1,142 @@
+﻿@page "/dashboard"
+@using Google.Cloud.Firestore;
+@using BlazorApp.Data;
+
+<div class="dashboard-header">
+    <h1>Dashboard</h1>
+ 
+</div>
+<body>
+    <div class="dashboard-container">
+        <!-- Overview Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>On-Going Projects</h3>
+                <div class="stat-number">@on_going_project</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Project</h3>
+                <div class="stat-number">@total_project</div>
+            </div>
+            <div class="stat-card">
+                <h3>Not Started Project</h3>
+                <div class="stat-number notstarted">@not_started_project</div>
+            </div>
+            <div class="stat-card">
+                <h3>Project Completed</h3>
+                <div class="stat-number complete">@percent_complete_project %</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Team Members</h3>
+                <div class="stat-number">@total_team_member </div>
+            </div>
+            <div class="stat-card">
+                <h5>Top Contributors</h5>
+                <h3>@Topmember</h3>
+                <div class="stat-number">@maxtask </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+@code{
+    public FirestoreDb db = FirestoreDb.Create("testing-af78b");
+
+    private int on_going_project = 0;
+    private int total_project = 0;
+    private int not_started_project = 0;
+    private double percent_complete_project = 0;
+
+    private int total_team_member = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckProject();
+        await CheckTeamMember();
+        await CheckTeamContribution();
+        
+    }
+    private async Task CheckProject()
+    {
+        CollectionReference collection = db.Collection("Project");
+        QuerySnapshot docs = await collection.GetSnapshotAsync();
+
+
+        foreach (var doc in docs.Documents)
+        {
+            if (doc.GetValue<string>("Status") == "In Progress")
+            {
+                on_going_project += 1;
+            }else{
+                on_going_project = on_going_project;
+            };
+
+
+            if (doc.GetValue<string>("Status") == "Not Started")
+            {
+                not_started_project += 1;
+            }
+            total_project += 1;
+
+        }
+
+        percent_complete_project = (total_project - (on_going_project + not_started_project));// / total_project)*100;
+        percent_complete_project = percent_complete_project / total_project * 100;
+        percent_complete_project = Math.Round(percent_complete_project, 2);
+
+    }
+
+    private async Task CheckTeamMember()
+    {
+        CollectionReference collection = db.Collection("Team");
+        QuerySnapshot docs = await collection.GetSnapshotAsync();
+
+        foreach (var doc in docs)
+        {
+            member.Add(doc.GetValue<string>("Name"));
+            total_team_member += 1;
+        }
+
+    }
+    private List<string> member = new List<string>();
+    private List<int> numberofTask = new List<int>();
+
+    private int num;
+
+    private int maxtask,maxindex;
+    private string Topmember;
+
+    private async Task CheckTeamContribution()
+    {
+        CollectionReference collection = db.Collection("Task");
+        QuerySnapshot docs = await collection.GetSnapshotAsync();
+
+
+
+        foreach (string name in member)
+        {
+            int num = 0; // Initialize num outside the inner loop
+
+            foreach (var doc in docs)
+            {
+                if (doc.GetValue<string>("Assignee") == name )
+                {
+                    num += 1; // Increment task count if the member is assigned
+                }
+            }
+
+            // Add the final count for this member to numberofTask
+            numberofTask.Add(num);
+        }
+
+        maxtask = numberofTask.Max();
+        maxindex = numberofTask.IndexOf(maxtask);
+
+        Topmember = member[maxindex];
+
+
+    }
+
+
+
+}

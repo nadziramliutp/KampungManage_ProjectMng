@@ -1,0 +1,113 @@
+﻿/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Body Styling */
+body {
+    background-color: #F5EFE8; /* Beige */
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Project Header */
+.project-header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 30px 0;
+    text-align: center;
+    margin-bottom: 30px;
+    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Form Section */
+.form-section {
+    background-color: #f4f7fc; /* Light grayish blue */
+    border: 1px solid #d1d8e0; /* White */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+h3 {
+    font-size: 1.8rem;
+    color: #567C8D; /* Teal */
+    margin-bottom: 20px;
+}
+
+/* Form Group */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    color: #2F4156; /* Navy */
+}
+
+input,
+select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #C8D9E6; /* Sky Blue */
+    
+}
+
+    input:focus,
+    select:focus {
+        border-color: #567C8D; /* Teal */
+        outline: none;
+    }
+
+/* Button */
+button {
+    background-color: #567C8D; /* Teal */
+    color: #FFFFFF;
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+
+}
+
+    button:hover {
+        background-color: #2F4156; /* Navy */
+    }
+
+/* Tracking Section */
+.tracking-section {
+    background-color: #FFFFFF; /* White */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+    .tracking-section p {
+        font-size: 1.2rem;
+        color: #2F4156; /* Navy */
+    }
+
+.btn-danger{
+    background-color: red;
+    color: #FFFFFF;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 50%;
+}

@@ -1,0 +1,128 @@
+
+@using Google.Cloud.Firestore;
+@using BlazorApp.Data;
+
+
+@page "/project"
+<div class="project-header">
+    <h1>Project Creation</h1>
+    <p>Add your project here </p>
+</div>
+
+
+<p>
+    <div class="form-section">
+        <div class="form-group">
+            <label for="name">Project Name</label>
+            <input @bind="name" placeholder="Project Name" required/>
+        </div>
+
+        <div class="form-group">
+            <label for="duedate">Due Date</label>
+            <input @bind="date" type="text" required placeholder="yy/mm/yyyy" />
+        </div>
+
+        <div class="form-group">
+            <label for="status">Project Status</label>
+            <select @bind="status" id="status" name="status" class="form-control" required>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+    
+
+    <button @onclick="AddNewProject">Add Project</button>
+    </div>
+</p>
+
+<div class="project-header">
+    <h1>Project Tracking</h1>
+    <p>Keep track all of your project here</p>
+</div>
+<!--
+@foreach (var proj in projs)
+{
+    <p>
+        <b>@proj.Name</b>
+        <button @onclick="(()=>DeleteNotes(proj.Id))">Delete Notes</button>
+    </p>
+}-->
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var proj in projs)
+            {
+                <tr>
+                    <td>@proj.Name</td>
+                    <td>@proj.DueDate</td>
+                    <td>@proj.Status</td>
+                    <td>
+                        <button class="btn-danger" @onclick="@(() => DeleteNotes(proj.Id))">
+                            Delete Notes
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    public FirestoreDb db = FirestoreDb.Create("testing-af78b");
+
+    ProjectModel Proj = new ProjectModel();
+
+    public IEnumerable<ProjectModel> projs = Array.Empty<ProjectModel>();
+
+    private async Task refreshList()
+    {
+        CollectionReference collection = db.Collection("Project");
+        QuerySnapshot docs = await collection.GetSnapshotAsync();
+
+        var projectlst = new List<ProjectModel>();
+        ProjectList projectList = new ProjectList();
+        foreach (var doc in docs.Documents)
+        {
+            projectlst.Add(new ProjectModel { Id = doc.Id , Name = doc.GetValue<string>("Name"), DueDate = doc.GetValue<string>("DueDate"), Status = doc.GetValue<string>("Status") });
+            
+        }
+
+        projs = projectlst;
+    }
+   
+
+    protected override async Task OnInitializedAsync()
+    {
+        await refreshList();
+    }
+    string name = "";
+    string date;
+    string status = "";
+
+    private async Task AddNewProject()
+    {
+        CollectionReference collection = db.Collection("Project");
+        await collection.AddAsync(new { Name=name, DueDate=date,Status=status});
+        await refreshList();
+
+    }
+    private async Task DeleteNotes(string id)
+    {
+        DocumentReference documentReference = db.Document("Project/" + id);
+        await documentReference.DeleteAsync();
+        await refreshList();
+        
+
+
+    }
+}

@@ -1,0 +1,159 @@
+@page "/client"
+@using BlazorApp.Data;
+@using Google.Cloud.Firestore;
+
+<PageTitle>Client Management</PageTitle>
+
+<div class="header">
+    <div class="text-container">
+        <h1>Clients</h1>
+        <p>Add new Client information</p>
+    </div>
+</div>
+
+<div class="form-container">
+   
+    <form id="client-form">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input @bind="name" type="text" id="name" name="name" placeholder="Client's Name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input @bind="email"  type="text" id="email" name="email" placeholder="Client's Email" required>
+        </div><div class="form-group">
+            <label for="phone">Phone:</label>
+            <input @bind="phone"  type="text" id="phone" name="phone" required>
+        </div>
+        <div class="form-group">
+            <label for="company">Company:</label>
+            <input @bind="company" type="text" id="company" name="company">
+        </div>
+        <div class="form-group">
+            <label for="project">Project: </label>
+            <select @bind="project">
+                <option value=""></option>
+                @foreach (string proj in projs)
+                {
+                    <option value="@proj">@proj</option>
+                }
+            </select>
+        </div>
+        <button @onclick="AddNewClient" type="submit" class="newclient-button">Add Client</button>
+    </form>
+</div>
+<!--
+@foreach (var client in clients)
+{
+    <p>
+        <b>@client.Name</b>
+        <button @onclick="(()=>DeleteClient(client.Id))">Delete Notes</button>
+    </p>
+} -->
+<div class="text-container">
+    <h1>View Clients</h1>
+    <p>View all of your Client information</p>
+</div>
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Company</th>
+                <th scope="col">Project</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in clients)
+            {
+                <tr>
+                    <td>@client.Name</td>
+                    <td>@client.Email</td>
+                    <td>@client.Phone</td>
+                    <td>@client.Company</td>
+                    <td>@client.ProjectName</td>
+                    <td>
+                        <button class="btn-danger" @onclick="@(() => DeleteClient(client.Id))">
+                            Delete Client
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    public FirestoreDb db = FirestoreDb.Create("testing-af78b");
+    ClientModel clientModel = new ClientModel();
+
+    protected ProjectList projectList = new ProjectList();
+
+    public IEnumerable<ClientModel> clients = Array.Empty<ClientModel>();
+
+    private async Task refreshList()
+    {
+        CollectionReference collection = db.Collection("Client");
+        QuerySnapshot docs = await collection.GetSnapshotAsync();
+
+        var lst = new List<ClientModel>();
+        foreach (var doc in docs.Documents)
+        {
+            lst.Add(new ClientModel { Id = doc.Id,Name = doc.GetValue<string>("Name"), Email = doc.GetValue<string>("Email"), Phone = doc.GetValue<string>("Phone"),Company = doc.GetValue<string>("Company"), ProjectName = doc.GetValue<string>("ProjectName") });
+        }
+        clients = lst;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await getProjectList();
+        await refreshList();
+        await getProjectList();
+    }
+    string name = "";
+    string email = "";
+    string phone = "";
+    string company = "";
+    string project = "";
+
+    private async Task AddNewClient()
+    {
+        CollectionReference collection = db.Collection("Client");
+        await collection.AddAsync(new { Name = name, Email = email, Phone = phone, Company = company, ProjectName = project});
+        await refreshList();
+    }
+
+    private async Task DeleteClient(string id)
+    {
+        DocumentReference documentReference = db.Document("Client/" + id);
+        await documentReference.DeleteAsync();
+        await refreshList();
+    }
+    public IEnumerable<string> projs = Array.Empty<string>();
+    private async Task getProjectList()
+    {
+        CollectionReference collection = db.Collection("Project");
+        QuerySnapshot docs = await collection.GetSnapshotAsync();
+
+        var projects = new List<string>();
+        foreach (var doc in docs.Documents)
+        {
+            projects.Add(doc.GetValue<string>("Name"));
+        }
+        projs = projects;
+    }
+   
+}
+
+
+
+
+
+
+
+
+
+
