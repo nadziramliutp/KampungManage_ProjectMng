@@ -4,5 +4,6 @@ This is a Blazor app created using Blazor Server App that connect directly to Fi
 
   
 ## Firebase Console - Firestore Database 
+![Alt Firebase](picture/Firebase.png)
 
 
